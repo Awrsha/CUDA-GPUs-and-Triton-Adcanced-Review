@@ -1,0 +1,5 @@
+// grandparent.mj
+class Foo:
+    var member: Int
+    init():
+        self.member = 0

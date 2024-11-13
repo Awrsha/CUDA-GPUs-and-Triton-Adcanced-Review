@@ -1,0 +1,2 @@
+// parent.mj
+import grandparent  // Mojo ensures grandparent is only imported once

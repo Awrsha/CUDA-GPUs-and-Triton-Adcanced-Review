@@ -1,0 +1,3 @@
+// child.mj
+import grandparent  // No re-importing
+import parent

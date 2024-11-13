@@ -1,0 +1,4 @@
+// main.mj
+import child
+
+// Use the Foo class from grandparent here
