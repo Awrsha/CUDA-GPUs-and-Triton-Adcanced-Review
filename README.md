@@ -6,7 +6,7 @@
 
 1. [The Deep Learning Ecosystem](01%20Deep%20Learning%20Ecosystem/README.md)
 2. [Setup/Installation](02%20Setup/README.md)
-3. [C/C++ Review](03_C_and_C++_Review/README.md)
+3. [C C++ Python R and Mojo review](03%20C%20C%2B%2B%20Python%20R%20and%20Mojo%20review)
 4. [Gentle Intro to GPUs](04_Gentle_Intro_to_GPUs/README.md)
 5. [Writing Your First Kernels](05_Writing_your_First_Kernels/README.md)
 6. [CUDA APIs (cuBLAS, cuDNN, etc)](06_CUDA_APIs/README.md)
