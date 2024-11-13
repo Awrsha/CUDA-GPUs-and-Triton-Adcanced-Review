@@ -1,181 +1,225 @@
-# **CUDA Installation Guide**
+# 🚀 CUDA Toolkit Installation Guide
 
-This guide will walk you through the process of installing **CUDA** on your machine, ensuring you can take full advantage of the GPU for deep learning and computational tasks. The instructions are optimized for both novice and advanced users.
+<div align="center">
+  <img src="https://img.shields.io/badge/CUDA-12.6-brightgreen?style=for-the-badge" alt="CUDA Version">
+  <img src="https://img.shields.io/badge/Platform-Linux%20|%20Windows-blue?style=for-the-badge" alt="Platform">
+  <img src="https://img.shields.io/badge/License-MIT-yellowgreen?style=for-the-badge" alt="License">
+</div>
+
+<p align="center">
+  <a href="#prerequisites">Prerequisites</a> •  <a href="#installation">Installation</a> •
+  <a href="#verification">Verification</a> •
+  <a href="#troubleshooting">Troubleshooting</a> •
+  <a href="#advanced-configuration">Advanced</a>
+</p>
 
 ---
 
-## **Prerequisites**
+## 🎯 Prerequisites
 
-Before proceeding with the installation, ensure the following:
+<details><summary>Hardware Requirements</summary>
 
-1. **NVIDIA GPU** installed on your system (you can verify this using the `nvidia-smi` command).
-2. **NVIDIA drivers** should be installed and configured correctly for your GPU.
-3. An updated system with **sudo** privileges for installation steps.
+| Component     | Minimum          | Recommended         |
+|---------------|------------------|---------------------|
+| GPU           | NVIDIA Kepler+   | NVIDIA Ampere/Hopper |
+| RAM           | 4GB              | 16GB+               |
+| Disk Space    | 2.5GB            | 10GB                |
+| CPU           | x86_64           | Multi-core x86_64   |
 
----
+</details>
 
-## **Step-by-Step Installation**
+<details>
+<summary>Software Requirements</summary>
 
-### **1. System Update**
-
-Open a terminal and update your system packages to ensure you're starting with the latest software:
-
-```bash
-sudo apt update && sudo apt upgrade -y && sudo apt autoremove
+```mermaid
+graph LR
+    A[Operating System] --> B[Linux/Windows]
+    B --> C[Compatible Driver]
+    C --> D[Development Tools]
 ```
 
-This ensures your system is up to date and cleans up any unnecessary packages.
+- 🖥️ **Operating System**
+  - Linux: Kernel 3.10+
+  - Windows: 10/11
+- 🔧 **Development Tools**
+  - GCC 7+ (Linux)  
+  - MSVC 2019+ (Windows)
+- 🎮 **NVIDIA Driver**: 525.0.0+
+
+</details>
 
 ---
 
-### **2. Download CUDA Toolkit**
+## 📦 Installation
 
-Go to the official [CUDA Downloads Page](https://developer.nvidia.com/cuda-downloads) and fill in the following details:
+### Linux Installation
 
-- **Operating System**: Select your OS (Ubuntu, CentOS, etc.).
-- **Architecture**: Choose `x86_64` for most modern systems.
-- **Distribution**: Choose the correct Linux distribution.
-- **Version**: Select the version you want to install (e.g., 12.6.0).
-- **Installer Type**: Choose **`runfile`** as the installer type.
-
-Click on the **Download** button to get the installer.
-
-Alternatively, you can directly download the installation file using `wget`:
+<details>
+<summary>Quick Install (Recommended)</summary>
 
 ```bash
-wget https://developer.download.nvidia.com/compute/cuda/12.6.0/local_installers/cuda_12.6.0_560.28.03_linux.run
+# Download CUDA Toolkit
+wget https://developer.download.nvidia.com/compute/cuda/12.6.0/local_installers/cuda_12.6.0_535.54.03_linux.run
+
+# Install
+sudo sh cuda_12.6.0_535.54.03_linux.run
+```
+</details>
+
+<details>
+<summary>Package Manager Install</summary>
+
+```bash
+# For Ubuntu/Debian
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
+sudo apt update
+sudo apt install cuda-toolkit-12-6
+```
+</details>
+
+### Windows Installation
+
+<details>
+<summary>Network Installer</summary>
+
+1. Download the [CUDA Network Installer](https://developer.nvidia.com/cuda-downloads)
+2. Run the installer
+3. Follow the wizard 🧙‍♂️
+</details>
+
+---
+
+## 🔧 Environment Setup
+
+Add these to your shell configuration file (`~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash
+# CUDA Toolkit Path
+export CUDA_HOME=/usr/local/cuda-12.6
+export PATH="$CUDA_HOME/bin:$PATH"
+export LD_LIBRARY_PATH="$CUDA_HOME/lib64:$LD_LIBRARY_PATH"
 ```
 
-This command downloads the CUDA installer package for version 12.6.0.
-
----
-
-### **3. Install CUDA**
-
-After downloading, navigate to the directory where the `.run` file is saved. Execute the installation command:
+<details><summary>📝 Optional Environment Variables</summary>
 
 ```bash
-sudo sh cuda_12.6.0_560.28.03_linux.run
+# Optional: CUDA device order
+export CUDA_DEVICE_ORDER=PCI_BUS_ID
+
+# Optional: Default device
+export CUDA_VISIBLE_DEVICES=0
+
+# Optional: CUDA cache path
+export CUDA_CACHE_PATH="$HOME/.cuda-cache"
 ```
-
-During installation, you’ll be prompted with some options. You can proceed with the default options, but be mindful of:
-
-- **Driver installation**: You may choose to install or skip installing NVIDIA drivers if they are already installed on your system.
-- **Toolkit installation**: Ensure that the CUDA Toolkit is installed.
-
-After the installation is complete, you can verify it by checking the **CUDA version** using the `nvcc` command.
+</details>
 
 ---
 
-### **4. Verify Installation**
-
-To check the installed version of CUDA, run:
+## ✅ Verification
 
 ```bash
+# Check CUDA compiler
 nvcc --version
-```
 
-You should see something similar to:
-
-```bash
-nvcc: NVIDIA (R) Cuda compiler driver
-Copyright (c) 2005-2024 NVIDIA Corporation
-Built on Thu_Sep_15_22:25:13_PDT_2024
-Cuda compilation tools, release 12.6, V12.6.0
-```
-
-Additionally, run `nvidia-smi` to confirm that your GPU is recognized by CUDA:
-
-```bash
+# Check NVIDIA driver
 nvidia-smi
+
+# Run sample test
+cd $CUDA_HOME/samples/1_Utilities/deviceQuery
+make
+./deviceQuery
 ```
 
-You should see information about your GPU and CUDA version.
+Expected Output:
+```
+📊 CUDA Device Query Results:  CUDA Version: 12.6
+  Driver Version: 535.54.03  CUDA Capability: x.y  ...
+```
 
 ---
 
-### **5. Update Environment Variables (if needed)**
+## 🔍 Troubleshooting
 
-If `nvcc` doesn’t work right away, the issue might be with your environment variables. First, check which shell you’re using:
+<details><summary>Common Issues</summary>
+
+| Issue                        | Solution                  |
+|------------------------------|---------------------------|
+| `nvcc: command not found`     | Check PATH variable       |
+| Driver version mismatch      | Update NVIDIA driver      |
+| Installation fails            | Check system requirements |
+| CUDA not found                | Verify environment variables |
+
+</details>
+
+<details><summary>Diagnostic Commands</summary>
 
 ```bash
-echo $SHELL
+# Check CUDA installation
+ls -l /usr/local/cuda
+
+# Check driver status
+systemctl status nvidia-driver
+
+# Check GPU detection
+lspci | grep -i nvidia
 ```
+</details>
 
-- If it returns `/bin/bash`, modify the **`~/.bashrc`** file.
-- If it returns `/bin/zsh`, modify the **`~/.zshrc`** file.
+---
 
-Add the following lines to the appropriate configuration file:
+## 🚀 Advanced Configuration
+
+<details>
+<summary>Multi-GPU Setup</summary>
 
 ```bash
-export PATH=/usr/local/cuda-12.6/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64
+# List all GPUs
+nvidia-smi -L
+
+# Set specific GPUs
+export CUDA_VISIBLE_DEVICES=0,1
+
+# Check GPU utilization
+nvidia-smi -l 1
 ```
+</details>
 
-Then, apply the changes:
+<details>
+<summary>Performance Optimization</summary>
 
-- For **Bash** users:
-
-  ```bash
-  source ~/.bashrc
-  ```
-
-- For **Zsh** users:
-
-  ```bash
-  source ~/.zshrc
-  ```
-
-Now, try running `nvcc -V` again.
-
----
-
-### **6. Alternative Method: Run Shell Script**
-
-If you prefer an automated method, you can run the shell script that handles the installation. Simply execute:
+- Enable persistence mode
 
 ```bash
-./cuda-installer.sh
+sudo nvidia-smi -pm 1
 ```
 
-This will automatically handle the installation steps for you.
+- Set GPU clock speeds
+
+```bash
+sudo nvidia-smi -ac 5001,1590
+```
+</details>
 
 ---
 
-## **Troubleshooting**
+## 📚 Additional Resources
 
-- **Issue**: `nvcc --version` command not found.
-
-  **Solution**: Ensure the environment variables are correctly set in your `~/.bashrc` or `~/.zshrc` and that you’ve sourced the file after modifications.
-
-- **Issue**: CUDA Toolkit installation fails during the process.
-
-  **Solution**: Ensure that you are not conflicting with an already installed version of CUDA. It might be necessary to uninstall previous CUDA versions using `sudo apt-get remove cuda` before reinstalling.
+- [📖 CUDA Documentation](https://docs.nvidia.com/cuda/)
+- [🎓 CUDA Training](https://developer.nvidia.com/cuda-training)
+- [💻 Sample Projects](https://github.com/NVIDIA/cuda-samples)
+- [🗣️ Developer Forums](https://forums.developer.nvidia.com/c/gpu-programming-and-driver-model/cuda/)
 
 ---
 
-## **Graphical User Interface (GUI) Installers**
+<div align="center">
 
-If you prefer to use a graphical interface for installation, you can download the **CUDA installer** with a GUI from the [CUDA downloads page](https://developer.nvidia.com/cuda-downloads).
+### 🌟 Support & Community
+[![Forum](https://img.shields.io/badge/-Forum-brightgreen?style=for-the-badge)](https://forums.developer.nvidia.com/)
+[![Issues](https://img.shields.io/badge/-Issues-orange?style=for-the-badge)](https://developer.nvidia.com/cuda-toolkit-bugfix-updates)
+[![Documentation](https://img.shields.io/badge/-Documentation-blue?style=for-the-badge)](https://docs.nvidia.com/cuda/)
 
----
-
-## **Conclusion**
-
-You have successfully installed **CUDA** on your system, enabling you to harness the power of GPU acceleration for deep learning tasks. You can now use this setup to run neural network models, optimize performance, and speed up computations.
-
-For further instructions and resources, refer to the official [NVIDIA CUDA documentation](https://docs.nvidia.com/cuda/).
+</div>
 
 ---
-
-## **Visual Enhancements (optional)**
-
-For a more graphical approach, include **screenshots** or **diagrams** of the steps, especially for the following sections:
-
-- **Environment setup** (e.g., where to modify `~/.bashrc` or `~/.zshrc`).
-- **Running `nvcc --version`** and **`nvidia-smi`** commands with expected outputs.
-- **CUDA installation options** screen, showing the prompts during installation.
-
----
-
-Happy coding! 🎉
