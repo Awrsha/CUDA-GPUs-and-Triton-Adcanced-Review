@@ -1,71 +1,102 @@
-# A gentle intro to GPUs
-> This aims to give you a bit of history about the GPU itself, why we use it for deep learning tasks, why its way faster than the CPU at certain tasks.
+# 🚀 Advanced Guide to GPUs and Parallel Computing
+> A comprehensive exploration of GPU architecture, evolution, and application in deep learning
 
-## Hardware
-![](assets/cpu.png)
-- CPU: Central Processing Unit 
-    - General purpose
-    - High clock speed
-    - Few cores
-    - High cache
-    - Low Latency
-    - Low throughput
+[![Made with Love](https://img.shields.io/badge/Made%20with-❤-red.svg)](/)
+[![GPU Guide](https://img.shields.io/badge/GPU-Guide-brightgreen.svg)](/)
+[![CUDA](https://img.shields.io/badge/CUDA-Enabled-blue.svg)](/)
 
-![](assets/gpu.png)
-- GPU: Graphics Processing Unit 
-    - Specialized
-    - Low clock speed
-    - Many cores
-    - Low cache
-    - High Latency
-    - High throughput
+## 📚 Table of Contents
+- [Hardware Architecture](#hardware-architecture)
+- [Processing Units Comparison](#processing-units-comparison)
+- [NVIDIA Evolution](#nvidia-evolution)
+- [Deep Learning Performance](#deep-learning-performance)
+- [CUDA Programming](#cuda-programming)
+- [Key Terminology](#key-terminology)
 
-![](assets/tpu.png)
-- TPU: Tensor Processing Unit 
-    - Specialized GPUs for deep learning algorithms (matrix multiplication, etc)
+## 💻 Hardware Architecture
 
-![](assets/fpga.png)
-- FPGA: Field Programmable Gate Array 
-    - Specialized hardware that can be reconfigured to perform specific tasks
-    - Very low latency
-    - Very high throughput
-    - Very high power consumption
-    - Very high cost
+### Processing Units Comparison Matrix
 
-## NVIDIA GPU History
-> This is a brief history of NVIDIA GPUs -> https://www.youtube.com/watch?v=kUqkOAU84bA
+| Feature | CPU | GPU | TPU | FPGA |
+|---------|-----|-----|-----|------|
+| Purpose | General | Graphics/Parallel | AI/ML | Configurable |
+| Clock Speed | ⚡ High | 🔸 Medium | 🔸 Medium | 🔸 Medium |
+| Cores | 🔸 Few | ⚡ Many | ⚡ Many | 📊 Variable |
+| Cache | ⚡ High | 🔸 Low | 🔸 Medium | 🔸 Low |
+| Latency | ⚡ Low | 🔸 High | 🔸 Medium | ⚡ Very Low |
+| Throughput | 🔸 Low | ⚡ High | ⚡ High | ⚡ Very High |
+| Power Usage | 🔸 Medium | 🔸 High | 🔸 Medium | ⚠️ Very High |
 
-![](assets/history01.png)
-![](assets/history02.png)
-![](assets/history03.png)
+## 🎮 NVIDIA Evolution
+> From Gaming to AI Revolution
 
-## What makes GPUs so fast for deep learning?
-![](assets/cpu-vs-gpu.png)
+### Timeline
 
-- CPU (host)
-    - minimize time of one task
-    - metric: latency in seconds
+```mermaid
+graph LR
+    A[1990s] --> B[GeForce]
+    B --> C[CUDA]
+    C --> D[Tesla]
+    D --> E[Modern GPUs]
 
-- GPU (device)
-    - maximize throughput
-    - metric: throughput in tasks per second (ex: pixels per ms)
+```
 
-## Typical CUDA program
-1. CPU allocates CPU memory
-2. CPU copies data to GPU
-3. CPU launches kernel on GPU (processing is done here)
-4. CPU copies results from GPU back to CPU to do something useful with it
+## ⚡ Deep Learning Performance
 
-Kernel looks like a serial program; says nothing about parallelism. Imagine you are trying to solve a jigsaw puzzle and all you are given is the location of each puzzle piece. The high level algorithm would be designed to take these individual pieces, and solve a single problem for each of them; “put the piece in the correct spot”. As long as all the pieces are assembled in the right place at the end, it works! You don't need to start at one corner and work your way across the puzzle. You can solve multiple pieces at the same time, as long as they don't interfere with each other.
+### Why GPUs Excel in Deep Learning?
 
-## Some terms to remember
-- kernels (not popcorn, not convolutional kernels, not linux kernels, but GPU kernels)
-- threads, blocks, and grid (next chapter)
-- GEMM = **GE**neral **M**atrix **M**ultiplication
-- SGEMM = **S**ingle precision (fp32) **GE**neral **M**atrix **M**ultiplication
-- cpu/host/functions vs gpu/device/kernels
-- CPU is referred to as the host. It executes functions. 
-- GPU is referred to as the device. It executes GPU functions called kernels.
+```mermaid
+graph TD
+    A[Parallel Processing] --> B[Matrix Operations]
+    B --> C[High Throughput]
+    C --> D[Faster Training]
+    A --> E[Multiple Cores]
+    E --> F[Concurrent Execution]
+```
 
+## 🔧 CUDA Programming Flow
 
+```mermaid
+sequenceDiagram
+    participant CPU
+    participant GPU
+    CPU->>CPU: Allocate Memory
+    CPU->>GPU: Copy Data
+    GPU->>GPU: Execute Kernel
+    GPU->>CPU: Return Results
+```
 
+## 📘 Key Terminology
+
+### Essential Concepts
+- `Kernel`: GPU-specific functions
+- `Thread/Block/Grid`: Execution hierarchy
+- `GEMM`: Matrix multiplication operations
+- `Host/Device`: CPU/GPU terminology
+
+### Memory Hierarchy
+
+```mermaid
+graph TD
+    A[Global Memory]
+    A1[Shared Memory]
+    A2[L2 Cache]
+    A1a[Registers]
+    A1b[L1 Cache]
+    B[Host Memory]
+
+    A --> A1
+    A --> A2
+    A1 --> A1a
+    A1 --> A1b
+    B --> A
+
+```
+
+## 🔍 Additional Resources
+- [NVIDIA Documentation](/)
+- [CUDA Programming Guide](/)
+- [Deep Learning Optimization](/)
+
+## 📝 License
+MIT License - Feel free to use and modify
