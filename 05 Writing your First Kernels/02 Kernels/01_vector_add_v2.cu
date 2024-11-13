@@ -1,3 +1,11 @@
+/*
+ * CUDA Vector Addition Benchmark
+ * This program compares the performance of vector addition across three implementations:
+ * 1. CPU (single-threaded)
+ * 2. GPU 1D (using 1D thread blocks)
+ * 3. GPU 3D (using 3D thread blocks)
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -5,73 +13,103 @@
 #include <math.h>
 #include <iostream>
 
-#define N 10000000  // Vector size = 10 million
-#define BLOCK_SIZE_1D 1024
-#define BLOCK_SIZE_3D_X 16
-#define BLOCK_SIZE_3D_Y 8
-#define BLOCK_SIZE_3D_Z 8
-// 16 * 16 * 8 = 2048
+// Configuration constants
+#define N 10000000  // Total vector size (10 million elements)
+#define BLOCK_SIZE_1D 1024  // Number of threads per block for 1D implementation
+// 3D block dimensions - total threads per block = 16 * 8 * 8 = 1024
+#define BLOCK_SIZE_3D_X 16  // Threads per block in X dimension
+#define BLOCK_SIZE_3D_Y 8   // Threads per block in Y dimension
+#define BLOCK_SIZE_3D_Z 8   // Threads per block in Z dimension
 
-// CPU vector addition
+/**
+ * CPU implementation of vector addition
+ * @param a First input vector
+ * @param b Second input vector
+ * @param c Output vector (a + b)
+ * @param n Vector size
+ */
 void vector_add_cpu(float *a, float *b, float *c, int n) {
     for (int i = 0; i < n; i++) {
-        c[i] = a[i] + b[i];
+        c[i] = a[i] + b[i];  // Sequential addition
     }
 }
 
-// CUDA kernel for 1D vector addition
+/**
+ * GPU kernel for 1D vector addition
+ * Each thread processes one element of the vector
+ * Memory access pattern: coalesced global memory access
+ */
 __global__ void vector_add_gpu_1d(float *a, float *b, float *c, int n) {
+    // Calculate global thread ID
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    // one add, one multiply, one store
+    
+    // Boundary check
     if (i < n) {
-        c[i] = a[i] + b[i];
-        // one add, one store
+        c[i] = a[i] + b[i];  // Parallel addition
     }
 }
 
-// CUDA kernel for 3D vector addition
+/**
+ * GPU kernel for 3D vector addition
+ * Demonstrates how to handle 3D data structures in CUDA
+ * Memory access pattern: strided access due to 3D layout
+ */
 __global__ void vector_add_gpu_3d(float *a, float *b, float *c, int nx, int ny, int nz) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
-    int k = blockIdx.z * blockDim.z + threadIdx.z;
-    // 3 adds, 3 multiplies, 3 stores
+    // Calculate 3D thread indices
+    int i = blockIdx.x * blockDim.x + threadIdx.x;  // X dimension
+    int j = blockIdx.y * blockDim.y + threadIdx.y;  // Y dimension
+    int k = blockIdx.z * blockDim.z + threadIdx.z;  // Z dimension
     
+    // Boundary check for each dimension
     if (i < nx && j < ny && k < nz) {
+        // Convert 3D index to linear memory index
         int idx = i + j * nx + k * nx * ny;
+        // Additional bounds check for safety
         if (idx < nx * ny * nz) {
             c[idx] = a[idx] + b[idx];
         }
     }
-    // you get the point...
 }
 
-// Initialize vector with random values
+/**
+ * Initialize vector with random float values between 0 and 1
+ * @param vec Vector to initialize
+ * @param n Vector size
+ */
 void init_vector(float *vec, int n) {
     for (int i = 0; i < n; i++) {
         vec[i] = (float)rand() / RAND_MAX;
     }
 }
 
-// Function to measure execution time
+/**
+ * High-precision timer function
+ * @return Current time in seconds with nanosecond precision
+ */
 double get_time() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec * 1e-9;
 }
+
 int main() {
-    float *h_a, *h_b, *h_c_cpu, *h_c_gpu_1d, *h_c_gpu_3d;
-    float *d_a, *d_b, *d_c_1d, *d_c_3d;
-    size_t size = N * sizeof(float);
+    // Host pointers (h_) and device pointers (d_)
+    float *h_a, *h_b, *h_c_cpu, *h_c_gpu_1d, *h_c_gpu_3d;  // Host memory
+    float *d_a, *d_b, *d_c_1d, *d_c_3d;                     // Device memory
+    size_t size = N * sizeof(float);  // Total memory size in bytes
 
-    // Allocate host memory
-    h_a = (float*)malloc(size);
-    h_b = (float*)malloc(size);
-    h_c_cpu = (float*)malloc(size);
-    h_c_gpu_1d = (float*)malloc(size);
-    h_c_gpu_3d = (float*)malloc(size);
+    // Allocate host memory with error checking
+    if ((h_a = (float*)malloc(size)) == NULL ||
+        (h_b = (float*)malloc(size)) == NULL ||
+        (h_c_cpu = (float*)malloc(size)) == NULL ||
+        (h_c_gpu_1d = (float*)malloc(size)) == NULL ||
+        (h_c_gpu_3d = (float*)malloc(size)) == NULL) {
+        fprintf(stderr, "Failed to allocate host memory\n");
+        exit(1);
+    }
 
-    // Initialize vectors
-    srand(time(NULL));
+    // Initialize input vectors with random data
+    srand(time(NULL));  // Seed random number generator
     init_vector(h_a, N);
     init_vector(h_b, N);
 
@@ -81,15 +119,16 @@ int main() {
     cudaMalloc(&d_c_1d, size);
     cudaMalloc(&d_c_3d, size);
 
-    // Copy data to device
+    // Transfer input data to device
     cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
 
-    // Define grid and block dimensions for 1D
+    // Calculate grid dimensions for 1D kernel
     int num_blocks_1d = (N + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D;
 
-    // Define grid and block dimensions for 3D
-    int nx = 100, ny = 100, nz = 1000; // N = 10000000 = 100 * 100 * 1000
+    // Calculate grid dimensions for 3D kernel
+    // Decompose 1D problem into 3D structure
+    int nx = 100, ny = 100, nz = 1000;  // nx * ny * nz = N
     dim3 block_size_3d(BLOCK_SIZE_3D_X, BLOCK_SIZE_3D_Y, BLOCK_SIZE_3D_Z);
     dim3 num_blocks_3d(
         (nx + block_size_3d.x - 1) / block_size_3d.x,
