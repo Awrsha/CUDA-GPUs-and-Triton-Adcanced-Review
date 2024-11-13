@@ -1,54 +1,126 @@
-# Writing your first CUDA Kernels
+# 🚀 CUDA Programming Guide: From Basics to Advanced
 
-> Everything starts here -> https://docs.nvidia.com/cuda/
-> We mainly focus on the CUDA C programming guide -> https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html
-> Consider following along here -> https://developer.nvidia.com/blog/even-easier-introduction-cuda/
+## 📚 Table of Contents
 
-- its generally a good idea to write code for a kernel first on CPU (easy to write), then on GPU to ensure your logic lines up on the level of blocks and threads. you can set some input x, feed it through the CPU function and GPU kernel, check if outputs are the same. this tells you if your GPU code is working as expected
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+- [Core Concepts](#core-concepts)
+- [Getting Started](#getting-started)
+- [Memory Hierarchy](#memory-hierarchy)
+- [Best Practices](#best-practices)
+- [Advanced Topics](#advanced-topics)
 
-- Practice vector addition and matrix multiplication by hand
-- Understand the concept of threads, blocks, and grids
+## 🎯 Introduction
 
-## To run our compile & run our vec add kernel:
+CUDA (Compute Unified Device Architecture) is NVIDIA's parallel computing platform and programming model. This guide will help you understand and implement CUDA kernels efficiently.
 
-```bash
-nvcc -o 01 01_vector_addition.cu
-./01
+### Key Resources
+- [CUDA Documentation](https://docs.nvidia.com/cuda/)
+- [CUDA C Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html)
+- [Hands-on Introduction](https://developer.nvidia.com/blog/even-easier-introduction-cuda/)
+
+## 💻 Prerequisites
+
+- NVIDIA GPU (Compute Capability 3.0+)
+- CUDA Toolkit installed
+- Basic C/C++ knowledge
+- Understanding of parallel computing concepts
+
+## 🔍 Core Concepts
+
+### Thread Hierarchy
+```
+Grid
+└── Blocks
+    └── Threads
 ```
 
-(add small explanations and diagrams from assets folder)
+## 🚀 Getting Started
 
-## Hardware Mapping
+### First CUDA Program: Vector Addition
 
-- CUDA cores handle threads
-- Streaming Multiprocessors (SMs) handle blocks (typically multiple blocks per SM depending on resources required)
-- Grids are mapped to the entire GPU since they are the highest level of the hierarchy
+```cpp
+__global__ void vectorAdd(float *a, float *b, float *c, int n) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < n) {
+        c[idx] = a[idx] + b[idx];
+    }
+}
+```
 
-## Memory Model
+### Compilation & Execution
+```bash
+nvcc -o vector_add vector_add.cu
+./vector_add
+```
 
-- Registers & Local Memory
-- Shared Memory ⇒ allows threads within a block to communicate
-- L2 cache. acts as buffer between cores/registers and global mem. also is a shared memory across SMs
-- L2 cache and Shared/L1 cache both use the same circuitry as SRAM so they run at about the same speed. L2 cache is bigger and gives
-- Speed: While both use SRAM, L2 is generally slower than L1. This is not due to the underlying technology, but rather due to:
-  - Size: L2 is larger, which increases access time.
-  - Shared nature: L2 is shared among all SMs, requiring more complex access mechanisms.
-  - Physical location: L2 is typically further from the compute units than L1.
-- Global Memory ⇒ Stores data copies to and from Host. Everything on device can access Global mem
-- Host ⇒ 16/32/64GB DRAM depending on your rig (those 4 RAM sticks on the motherboard)
-- Arrays too big to fit into the Register will spill into local memory. our goal is to make sure this doesn’t happen because we want to keep our program running as fast as possible
+## 🧠 Memory Hierarchy
 
-![](assets/memhierarchy.png)
+| Memory Type | Scope | Lifetime | Speed |
+|------------|--------|----------|--------|
+| Registers | Thread | Thread | Fastest |
+| Shared Memory | Block | Block | Very Fast |
+| Global Memory | Grid | Application | Slow |
+| Constant Memory | Grid | Application | Fast (cached) |
 
+## 🎯 Best Practices
 
-### What is _random_ access memory?
+1. **Memory Coalescing**
+   - Align memory accesses
+   - Use appropriate data types
 
-- in a video tape you have to access the bits sequentially to reach
-  the last ones. random refers to the nature of instantly getting information
-  from a given random index (without relying on having to index anything else). we are provided with an abstraction that seems like memory is a giant line but on chip its actually layed out as a grid (circuitry takes care of things here)
+2. **Occupancy Optimization**
+   - Balance resource usage
+   - Optimize block sizes
 
-![](../assets/memmodel.png)
+3. **Warp Efficiency**
+   - Minimize divergent branching
+   - Utilize warp-level primitives
 
+## 🔬 Advanced Topics
 
-> [Efficient Matrix Tranpose Nvidia Blog Post](https://developer.nvidia.com/blog/efficient-matrix-transpose-cuda-cc/)
+### Matrix Operations
+```cpp
+__global__ void matrixMul(float *A, float *B, float *C, int N) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    if (row < N && col < N) {
+        float sum = 0.0f;
+        for (int k = 0; k < N; k++) {
+            sum += A[row * N + k] * B[k * N + col];
+        }
+        C[row * N + col] = sum;
+    }
+}
+```
 
+### Performance Monitoring
+
+```bash
+nvprof ./your_program  # Profile CUDA applications
+```
+
+## 📈 Optimization Tips
+
+1. **Memory Transfer**
+   - Minimize host-device transfers
+   - Use pinned memory for better bandwidth
+
+2. **Kernel Configuration**
+   - Choose optimal block sizes
+   - Consider hardware limitations
+
+3. **Algorithm Design**
+   - Design for parallelism
+   - Reduce sequential dependencies
+
+## 🔗 Additional Resources
+
+- [NVIDIA Developer Blog](https://developer.nvidia.com/blog)
+- [CUDA Samples Repository](https://github.com/NVIDIA/cuda-samples)
+- [CUDA Training](https://developer.nvidia.com/cuda-training)
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
