@@ -5,7 +5,7 @@
 ## Table of Contents
 
 1. [The Deep Learning Ecosystem](01%20Deep%20Learning%20Ecosystem/README.md)
-2. [Setup/Installation](02_Setup/README.md)
+2. [Setup/Installation](02%20Setup/README.md)
 3. [C/C++ Review](03_C_and_C++_Review/README.md)
 4. [Gentle Intro to GPUs](04_Gentle_Intro_to_GPUs/README.md)
 5. [Writing Your First Kernels](05_Writing_your_First_Kernels/README.md)
